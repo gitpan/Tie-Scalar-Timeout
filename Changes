@@ -1,0 +1,6 @@
+Revision history for Perl extension Tie::Scalar::Timeout.
+
+0.01  Wed Nov  1 12:54:15 2000
+	- original version; created by h2xs 1.20 with options
+		-XA -n Tie::Scalar::Timeout
+
