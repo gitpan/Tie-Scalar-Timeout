@@ -91,7 +91,7 @@ AVAILABILITY
     <http://www.perl.com/CPAN/authors/id/M/MA/MARCEL/>.
 
 VERSION
-    This document describes version 1.3.1 of Tie::Scalar::Timeout.
+    This document describes version 1.3.2 of Tie::Scalar::Timeout.
 
 BUGS
     None known so far. If you find any bugs or oddities, please do tell me
@@ -101,7 +101,7 @@ AUTHOR
     Marcel Grünauer <marcel@cpan.org>
 
 COPYRIGHT
-    Copyright 2000 Marcel Grünauer. All rights reserved.
+    Copyright 2000-2003 Marcel Grünauer. All rights reserved.
 
     This library is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.

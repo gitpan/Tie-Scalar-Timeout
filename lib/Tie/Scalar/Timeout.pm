@@ -5,7 +5,7 @@ use strict;
 use base 'Tie::Scalar';
 use Time::Local;
 
-our $VERSION = '1.3.1';
+our $VERSION = '1.3.2';
 
 sub TIESCALAR {
 	my $class = shift;
@@ -212,29 +212,7 @@ site near you.  Or see <http://www.perl.com/CPAN/authors/id/M/MA/MARCEL/>.
 
 =head1 VERSION
 
-This document describes version 1.3.1 of Tie::Scalar::Timeout.
-
-=head1 CHANGE LOG
-
-=over 4
-
-=item 1.3
-
-Various POD changes.
-
-Changed the author's email address yet again (sigh). This time, hopefully,
-it's more permanent, as it's the cpan.org address, the forward address
-for which can be changed in the PAUSE interface.
-
-=item 1.2
-
-Changed the author's email address.
-
-=item 1.1
-
-Unreleased service upgrade
-
-=back
+This document describes version 1.3.2 of Tie::Scalar::Timeout.
 
 =head1 BUGS
 
