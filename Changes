@@ -1,0 +1,21 @@
+Revision history for Perl extension Data::Stream.
+
+1.31  Wed Apr  2 14:11:17 CEST 2003
+    - minor moving around of bits and pieces; also made it
+      backwards-compatible to perl 5.5.3.
+
+1.3   <date unknown>
+    - Various POD changes.
+
+    - Changed the author's email address yet again (sigh). This time,
+      hopefully, it's more permanent, as it's the cpan.org address, the
+      forward address for which can be changed in the PAUSE interface.
+
+1.2   <date unknown>
+     - Changed the author's email address.
+
+1.1   <date unknown>
+     - Unreleased service upgrade
+
+1.0   <date unknown>
+     - Original release

@@ -1,13 +1,11 @@
 package Tie::Scalar::Timeout;
 
-# $Id: Timeout.pm,v 1.3 2002/08/30 09:25:53 marcelgr Exp $
-
 use strict;
-use warnings;
+# use warnings;    -- taken out for 5.5.3 compatibility
 use base 'Tie::Scalar';
 use Time::Local;
 
-(our $VERSION) = '$Revision: 1.3 $' =~ /([\d.]+)/;
+our $VERSION = '1.3.1';
 
 sub TIESCALAR {
 	my $class = shift;
@@ -112,45 +110,6 @@ sub _expire_calc {
 1;
 __END__
 
-=for makepmdist-tests
-BEGIN { $| = 1; print "1..12\n"; }
-END {print "not ok 1\n" unless $loaded;}
-use Tie::Scalar::Timeout;
-$loaded = 1;
-print "ok 1\n";
-tie my $k, 'Tie::Scalar::Timeout', EXPIRES => '+2s';
-print "not " if defined $k; print "ok 2\n";
-$k = 123;
-print "not " unless $k == 123; print "ok 3\n";
-sleep(3);
-print "not " if defined $k; print "ok 4\n";
-#######################################
-# test assigning via tie() and num_uses
-tie my $m, 'Tie::Scalar::Timeout', NUM_USES => 3, VALUE => 456;
-print "not " unless $m == 456; print "ok 5\n";
-for (0..2) { my $tmp = $m }
-print "not " if defined $m; print "ok 6\n";
-#######################################
-# test reassigning a value so num_uses is reset
-$m = 789;
-print "not " unless $m == 789; print "ok 7\n";
-for (0..2) { my $tmp = $m }
-print "not " if defined $m; print "ok 8\n";
-#######################################
-# test a fixed-value expiration policy
-tie my $n, 'Tie::Scalar::Timeout', VALUE => 987, NUM_USES => 1, POLICY => 777;
-print "not " unless $n == 987; print "ok 9\n";
-print "not " unless $n == 777; print "ok 10\n";
-#######################################
-# test a coderef expiration policy
-tie my $p, 'Tie::Scalar::Timeout', VALUE => 654, NUM_USES => 1,
-    POLICY => \&expired;
-my $is_expired;
-print "not " unless $p == 654; print "ok 11\n";
-$_ = $p;   # to activate FETCH
-print "not " unless $is_expired; print "ok 12\n";
-sub expired { $is_expired++ }
-
 =head1 NAME
 
 Tie::Scalar::Timeout - Scalar variables that time out
@@ -253,7 +212,7 @@ site near you.  Or see <http://www.perl.com/CPAN/authors/id/M/MA/MARCEL/>.
 
 =head1 VERSION
 
-$Id: Timeout.pm,v 1.3 2002/08/30 09:25:53 marcelgr Exp $
+This document describes version 1.3.1 of Tie::Scalar::Timeout.
 
 =head1 CHANGE LOG
 
@@ -288,7 +247,7 @@ Marcel GrE<uuml>nauer <marcel@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright 2000 Marcel GrE<uuml>nauer. All rights reserved.
+Copyright 2000-2003 Marcel GrE<uuml>nauer. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

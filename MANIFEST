@@ -1,4 +1,5 @@
-Timeout.pm
+Changes
+lib/Tie/Scalar/Timeout.pm
 Makefile.PL
 t/test.t
 README
