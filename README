@@ -1,0 +1,122 @@
+NAME
+    Tie::Scalar::Timeout - Scalar variables that time out
+
+SYNOPSIS
+      use Tie::Scalar::Timeout;
+  
+      tie my $k, 'Tie::Scalar::Timeout', EXPIRES => '+2s';
+  
+      $k = 123;
+      sleep(3);
+      # $k is now undef
+  
+      tie my $m, 'Tie::Scalar::Timeout', NUM_USES => 3, VALUE => 456;
+  
+      tie my $n, 'Tie::Scalar::Timeout', VALUE => 987, NUM_USES => 1,
+          POLICY => 777;
+  
+      tie my $p, 'Tie::Scalar::Timeout', VALUE => 654, NUM_USES => 1,
+          POLICY => \&expired;
+      sub expired { $is_expired++ }
+
+DESCRIPTION
+    This module allows you to tie a scalar variable whose value will be
+    reset (subject to an expiry policy) after a certain time and/or a
+    certain number of uses. One possible application for this module might
+    be to time out session variables in mod_perl programs.
+
+    When tying, you can specify named arguments in the form of a hash. The
+    following named parameters are supported:
+
+    "EXPIRES"
+        Use "EXPIRES" to specify an interval or absolute time after which
+        the value will be reset. (Technically, the value will still be
+        there, but the module's FETCH sub will return the value as dictated
+        by the expiry policy.)
+
+        Values for the "EXPIRES" field are modelled after Netscape's cookie
+        expiration times. Except, of course, that negative values don't
+        really make sense in a universe with linear, one-way time. The
+        following forms are all valid for the "EXPIRES" field:
+
+            +30s                    30 seconds from now
+            +10m                    ten minutes from now
+            +1h                     one hour from now
+            +3M                     in three months
+            +10y                    in ten years time
+            25-Apr-2001 00:40:33    at the indicated time & date
+
+        Assigning a value to the variable causes "EXPIRES" to be reset to
+        the original value.
+
+    "VALUE"
+        Using the "VALUE" hash key, you can specify an initial value for the
+        variable.
+
+    "NUM_USES"
+        Alternatively or in addition to "EXPIRES", you can also specify a
+        maximum number of times the variable may be read from before it
+        expires. If both "EXPIRES" and "NUM_USES" are set, the variable will
+        expire when either condition becomes true. If "NUM_USES" isn't set
+        or set to a negative value, it won't influence the expiry process.
+
+        Assigning a value to the variable causes "NUM_USES" to be reset to
+        the original value.
+
+    "POLICY"
+        The expiration policy determines what happens to the variable's
+        value when it expires. If you don't specify a policy, the variable
+        will be "undef" after it has expired. You can specify either a
+        scalar value or a code reference as the value of the "POLICY"
+        parameter. If you specify a scalar value, that value will be
+        returned after the variable has expired. Thus, the default
+        expiration policy is equivalent to
+
+            POLICY => undef
+
+        If you specify a code reference as the value of the "POLICY"
+        parameter, that code will be called when the variable value is
+        "FETCH()"ed after it has expired. This might be used to set some
+        other variable, or reset the variable to a different value, for
+        example.
+
+INSTALLATION
+    See perlmodinstall for information and options on installing Perl
+    modules.
+
+AVAILABILITY
+    The latest version of this module is available from the Comprehensive
+    Perl Archive Network (CPAN). Visit <http://www.perl.com/CPAN/> to find a
+    CPAN site near you. Or see
+    <http://www.perl.com/CPAN/authors/id/M/MA/MARCEL/>.
+
+VERSION
+    $Id: Timeout.pm,v 1.3 2002/08/30 09:25:53 marcelgr Exp $
+
+CHANGE LOG
+    1.3 Various POD changes.
+
+        Changed the author's email address yet again (sigh). This time,
+        hopefully, it's more permanent, as it's the cpan.org address, the
+        forward address for which can be changed in the PAUSE interface.
+
+    1.2 Changed the author's email address.
+
+    1.1 Unreleased service upgrade
+
+BUGS
+    None known so far. If you find any bugs or oddities, please do tell me
+    about them.
+
+AUTHOR
+    Marcel Grünauer <marcel@cpan.org>
+
+COPYRIGHT
+    Copyright 2000 Marcel Grünauer. All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+SEE ALSO
+    perl(1), Tie::Scalar(3pm).
+

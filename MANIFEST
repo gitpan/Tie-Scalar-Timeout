@@ -1,5 +1,5 @@
-Changes
-MANIFEST
-Makefile.PL
 Timeout.pm
-test.pl
+Makefile.PL
+t/test.t
+README
+MANIFEST

@@ -1,25 +1,13 @@
 package Tie::Scalar::Timeout;
 
-#
-# $Id: Timeout.pm,v 1.2 2000/11/08 13:57:28 marcel Exp $
-#
-# $Log: Timeout.pm,v $
-# Revision 1.2  2000/11/08 13:57:28  marcel
-# Added documentation
-#
-# Revision 1.1.1.1  2000/11/08 13:16:50  marcel
-# First import.
-#
-#
+# $Id: Timeout.pm,v 1.3 2002/08/30 09:25:53 marcelgr Exp $
 
-require 5.005_62;
 use strict;
 use warnings;
-use Tie::Scalar;
+use base 'Tie::Scalar';
 use Time::Local;
 
-our @ISA = qw(Tie::Scalar);
-(our $VERSION) = '$Revision: 1.2 $' =~ /([\d.]+)/;
+(our $VERSION) = '$Revision: 1.3 $' =~ /([\d.]+)/;
 
 sub TIESCALAR {
 	my $class = shift;
@@ -124,6 +112,45 @@ sub _expire_calc {
 1;
 __END__
 
+=for makepmdist-tests
+BEGIN { $| = 1; print "1..12\n"; }
+END {print "not ok 1\n" unless $loaded;}
+use Tie::Scalar::Timeout;
+$loaded = 1;
+print "ok 1\n";
+tie my $k, 'Tie::Scalar::Timeout', EXPIRES => '+2s';
+print "not " if defined $k; print "ok 2\n";
+$k = 123;
+print "not " unless $k == 123; print "ok 3\n";
+sleep(3);
+print "not " if defined $k; print "ok 4\n";
+#######################################
+# test assigning via tie() and num_uses
+tie my $m, 'Tie::Scalar::Timeout', NUM_USES => 3, VALUE => 456;
+print "not " unless $m == 456; print "ok 5\n";
+for (0..2) { my $tmp = $m }
+print "not " if defined $m; print "ok 6\n";
+#######################################
+# test reassigning a value so num_uses is reset
+$m = 789;
+print "not " unless $m == 789; print "ok 7\n";
+for (0..2) { my $tmp = $m }
+print "not " if defined $m; print "ok 8\n";
+#######################################
+# test a fixed-value expiration policy
+tie my $n, 'Tie::Scalar::Timeout', VALUE => 987, NUM_USES => 1, POLICY => 777;
+print "not " unless $n == 987; print "ok 9\n";
+print "not " unless $n == 777; print "ok 10\n";
+#######################################
+# test a coderef expiration policy
+tie my $p, 'Tie::Scalar::Timeout', VALUE => 654, NUM_USES => 1,
+    POLICY => \&expired;
+my $is_expired;
+print "not " unless $p == 654; print "ok 11\n";
+$_ = $p;   # to activate FETCH
+print "not " unless $is_expired; print "ok 12\n";
+sub expired { $is_expired++ }
+
 =head1 NAME
 
 Tie::Scalar::Timeout - Scalar variables that time out
@@ -214,6 +241,42 @@ variable to a different value, for example.
 
 =back
 
+=head1 INSTALLATION
+
+See perlmodinstall for information and options on installing Perl modules.
+
+=head1 AVAILABILITY
+
+The latest version of this module is available from the Comprehensive Perl
+Archive Network (CPAN).  Visit <http://www.perl.com/CPAN/> to find a CPAN
+site near you.  Or see <http://www.perl.com/CPAN/authors/id/M/MA/MARCEL/>.
+
+=head1 VERSION
+
+$Id: Timeout.pm,v 1.3 2002/08/30 09:25:53 marcelgr Exp $
+
+=head1 CHANGE LOG
+
+=over 4
+
+=item 1.3
+
+Various POD changes.
+
+Changed the author's email address yet again (sigh). This time, hopefully,
+it's more permanent, as it's the cpan.org address, the forward address
+for which can be changed in the PAUSE interface.
+
+=item 1.2
+
+Changed the author's email address.
+
+=item 1.1
+
+Unreleased service upgrade
+
+=back
+
 =head1 BUGS
 
 None known so far. If you find any bugs or oddities, please do tell me
@@ -221,7 +284,7 @@ about them.
 
 =head1 AUTHOR
 
-Marcel GrE<uuml>nauer <marcel@codewerk.com>
+Marcel GrE<uuml>nauer <marcel@cpan.org>
 
 =head1 COPYRIGHT
 
