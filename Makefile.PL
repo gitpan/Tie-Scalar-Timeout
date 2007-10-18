@@ -1,10 +1,12 @@
-require 5.004;
-use strict;
-use ExtUtils::MakeMaker;
+use inc::Module::Install;
+name 'Tie-Scalar-Timeout';
+all_from 'lib/Tie/Scalar/Timeout.pm';
+perl_version '5.006';
 
-WriteMakefile(
-  NAME         => 'Tie::Scalar::Timeout',
-  VERSION_FROM => 'lib/Tie/Scalar/Timeout.pm',
-  dist         => { COMPRESS => 'gzip -6f', SUFFIX => 'gz', },
-);
+requires 'Time::Local';
 
+build_requires 'Test::More' => '0.70';
+
+use_standard_tests;
+auto_include;
+WriteAll;
