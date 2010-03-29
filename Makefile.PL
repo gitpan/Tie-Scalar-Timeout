@@ -1,12 +1,46 @@
-use inc::Module::Install;
-name 'Tie-Scalar-Timeout';
-all_from 'lib/Tie/Scalar/Timeout.pm';
-perl_version '5.006';
 
-requires 'Time::Local';
+use strict;
+use warnings;
 
-build_requires 'Test::More' => '0.70';
+ BEGIN { require 5.008; } 
 
-use_standard_tests;
-auto_include;
-WriteAll;
+use ExtUtils::MakeMaker 6.11;
+
+
+
+my %WriteMakefileArgs = (
+                       'test' => {
+                                   'TESTS' => 't/*.t'
+                                 },
+                       'NAME' => 'Tie::Scalar::Timeout',
+                       'DISTNAME' => 'Tie-Scalar-Timeout',
+                       'CONFIGURE_REQUIRES' => {
+                                                 'ExtUtils::MakeMaker' => '6.11'
+                                               },
+                       'AUTHOR' => 'Marcel Gruenauer <marcel@cpan.org>',
+                       'BUILD_REQUIRES' => {},
+                       'ABSTRACT' => 'Scalar variables that time out',
+                       'EXE_FILES' => [],
+                       'VERSION' => '1.100880',
+                       'PREREQ_PM' => {
+                                        'Test::More' => '0.88',
+                                        'Tie::Scalar' => '0',
+                                        'Scalar::Util' => '0',
+                                        'parent' => '0',
+                                        'English' => '0',
+                                        'File::Find' => '0',
+                                        'File::Temp' => '0',
+                                        'Time::Local' => '0',
+                                        'Carp' => '0'
+                                      },
+                       'LICENSE' => 'perl'
+                     );
+
+
+delete $WriteMakefileArgs{LICENSE}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.31) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

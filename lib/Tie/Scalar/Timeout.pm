@@ -1,144 +1,152 @@
-package Tie::Scalar::Timeout;
-
+use 5.008;
 use strict;
-# use warnings;    -- taken out for 5.5.3 compatibility
-use base 'Tie::Scalar';
+use warnings;
+
+package Tie::Scalar::Timeout;
+our $VERSION = '1.100880';
+# ABSTRACT: Scalar variables that time out
+use parent 'Tie::Scalar';
 use Time::Local;
 
-our $VERSION = '1.33';
-
 sub TIESCALAR {
-	my $class = shift;
-	my $self = {
-	    VALUE    => undef,
-	    EXPIRES  => '+1d',
-	    POLICY   => undef,
-	    NUM_USES => -1,
-	    @_,
-	};
-	$self->{EXPIRY_TIME} = _expire_calc($self->{EXPIRES});
-	$self->{NUM_USES_ORIG} = $self->{NUM_USES};
-	return bless $self, $class;
+    my $class = shift;
+    my $self  = {
+        VALUE    => undef,
+        EXPIRES  => '+1d',
+        POLICY   => undef,
+        NUM_USES => -1,
+        @_,
+    };
+    $self->{EXPIRY_TIME}   = _expire_calc($self->{EXPIRES});
+    $self->{NUM_USES_ORIG} = $self->{NUM_USES};
+    return bless $self, $class;
 }
 
 sub FETCH {
-	my $self = shift;
+    my $self = shift;
 
-	# if num_uses isn't set or set to a negative value, it won't
-	# influence the expiry process
+    # if num_uses isn't set or set to a negative value, it won't
+    # influence the expiration process
+    if (   ($self->{NUM_USES} == 0)
+        || (time >= $self->{EXPIRY_TIME})) {
 
-	if (($self->{NUM_USES} == 0) ||
-	   (time >= $self->{EXPIRY_TIME})) {
-	   	# policy can be a coderef or a plain value
-		return &{ $self->{POLICY} } if ref($self->{POLICY}) eq 'CODE';
-		return $self->{POLICY};
-	}
-	$self->{NUM_USES}-- if $self->{NUM_USES} > 0;
-	return $self->{VALUE};
+        # policy can be a coderef or a plain value
+        return &{ $self->{POLICY} } if ref($self->{POLICY}) eq 'CODE';
+        return $self->{POLICY};
+    }
+    $self->{NUM_USES}-- if $self->{NUM_USES} > 0;
+    return $self->{VALUE};
 }
 
 sub STORE {
-	my $self = shift;
-	$self->{VALUE} = shift;
+    my $self = shift;
+    $self->{VALUE} = shift;
 
-	# reset expiry time and number of uses
-
-	$self->{EXPIRY_TIME} = _expire_calc($self->{EXPIRES});
-	$self->{NUM_USES} = $self->{NUM_USES_ORIG};
+    # reset expiration time and number of uses
+    $self->{EXPIRY_TIME} = _expire_calc($self->{EXPIRES});
+    $self->{NUM_USES}    = $self->{NUM_USES_ORIG};
 }
 
 # This routine was nicked and adapted from CGI.pm. It should probably go
 # into a separate module.  This internal routine creates an expires time
 # exactly some number of hours from the current time.  It incorporates
 # modifications from Mark Fisher.
-
 sub _expire_calc {
-	my $time = shift;
-	my %mult = (
-	    's'=>1,
-	    'm'=>60,
-	    'h'=>60*60,
-	    'd'=>60*60*24,
-	    'M'=>60*60*24*30,
-	    'y'=>60*60*24*365);
-	# format for time can be in any of the forms...
-	# "now" -- expire immediately
-	# "+180s" -- in 180 seconds
-	# "+2m" -- in 2 minutes
-	# "+12h" -- in 12 hours
-	# "+1d"  -- in 1 day
-	# "+3M"  -- in 3 months
-	# "+2y"  -- in 2 years
-	# "-3m"  -- 3 minutes ago(!)
-	# If you don't supply one of these forms, we assume you are
-	# specifying the date yourself
-	my $offset;
-	# if (!$time || (lc($time) eq 'now')) {
-	if (lc($time) eq 'now') {
-		$offset = 0;
-	} elsif ($time =~ /^(\d\d?)-(\w{3})-(\d{4}) (\d\d?):(\d\d?):(\d\d?)/){
-		require Time::Local;   # don't use unless necessary
-		my ($mday, $monthname, $year, $hours, $min, $sec) =
-		    ($1, $2, $3, $4, $5, $6);
-		my $month = {
-		    jan =>  0,
-		    feb =>  1,
-		    mar =>  2,
-		    apr =>  3,
-		    may =>  4,
-		    jun =>  5,
-		    jul =>  6,
-		    aug =>  7,
-		    sep =>  8,
-		    oct =>  9,
-		    nov => 10,
-		    dec => 11,
-		} -> { lc $monthname };
-		$year -= 1900;
-		return Time::Local::timelocal_nocheck
-		    ($sec, $min, $hours, $mday, $month, $year)
-	} elsif ($time =~ /^\d+/) {
-		return $time;
-	} elsif ($time =~ /^([+-]?(?:\d+|\d*\.\d*))([mhdMy]?)/) {
-		$offset = ($mult{$2} || 1)*$1;
-	} else {
-		return $time;
-	}
-	return time + $offset;
-}
+    my $time = shift;
+    my %mult = (
+        's' => 1,
+        'm' => 60,
+        'h' => 60 * 60,
+        'd' => 60 * 60 * 24,
+        'M' => 60 * 60 * 24 * 30,
+        'y' => 60 * 60 * 24 * 365
+    );
 
+    # format for time can be in any of the forms...
+    # "now" -- expire immediately
+    # "+180s" -- in 180 seconds
+    # "+2m" -- in 2 minutes
+    # "+12h" -- in 12 hours
+    # "+1d"  -- in 1 day
+    # "+3M"  -- in 3 months
+    # "+2y"  -- in 2 years
+    # "-3m"  -- 3 minutes ago(!)
+    # If you don't supply one of these forms, we assume you are
+    # specifying the date yourself
+    my $offset;
+
+    # if (!$time || (lc($time) eq 'now')) {
+    if (lc($time) eq 'now') {
+        $offset = 0;
+    } elsif ($time =~ /^(\d\d?)-(\w{3})-(\d{4}) (\d\d?):(\d\d?):(\d\d?)/) {
+        require Time::Local;    # don't use unless necessary
+        my ($mday, $monthname, $year, $hours, $min, $sec) =
+          ($1, $2, $3, $4, $5, $6);
+        my $month = {
+            jan => 0,
+            feb => 1,
+            mar => 2,
+            apr => 3,
+            may => 4,
+            jun => 5,
+            jul => 6,
+            aug => 7,
+            sep => 8,
+            oct => 9,
+            nov => 10,
+            dec => 11,
+        }->{ lc $monthname };
+        $year -= 1900;
+        return Time::Local::timelocal_nocheck($sec, $min, $hours, $mday, $month,
+            $year);
+    } elsif ($time =~ /^\d+/) {
+        return $time;
+    } elsif ($time =~ /^([+-]?(?:\d+|\d*\.\d*))([mhdMy]?)/) {
+        $offset = ($mult{$2} || 1) * $1;
+    } else {
+        return $time;
+    }
+    return time + $offset;
+}
 1;
+
+
 __END__
+=pod
 
 =head1 NAME
 
 Tie::Scalar::Timeout - Scalar variables that time out
 
+=head1 VERSION
+
+version 1.100880
+
 =head1 SYNOPSIS
 
-  use Tie::Scalar::Timeout;
+    use Tie::Scalar::Timeout;
+
+    tie my $k, 'Tie::Scalar::Timeout', EXPIRES => '+2s';
+
+    $k = 123;
+    sleep(3);
+    # $k is now undef
   
-  tie my $k, 'Tie::Scalar::Timeout', EXPIRES => '+2s';
+    tie my $m, 'Tie::Scalar::Timeout', NUM_USES => 3, VALUE => 456;
   
-  $k = 123;
-  sleep(3);
-  # $k is now undef
+    tie my $n, 'Tie::Scalar::Timeout', VALUE => 987, NUM_USES => 1,
+        POLICY => 777;
   
-  tie my $m, 'Tie::Scalar::Timeout', NUM_USES => 3, VALUE => 456;
-  
-  tie my $n, 'Tie::Scalar::Timeout', VALUE => 987, NUM_USES => 1,
-      POLICY => 777;
-  
-  tie my $p, 'Tie::Scalar::Timeout', VALUE => 654, NUM_USES => 1,
-      POLICY => \&expired;
-  sub expired { $is_expired++ }
+    tie my $p, 'Tie::Scalar::Timeout', VALUE => 654, NUM_USES => 1,
+        POLICY => \&expired;
+    sub expired { our $is_expired; $is_expired++ }
 
 =head1 DESCRIPTION
 
 This module allows you to tie a scalar variable whose value will be reset
-(subject to an expiry policy) after a certain time and/or a certain number
-of uses. One possible application for this module might be to time out
-session variables in mod_perl programs.
+(subject to an expiration policy) after a certain time and/or a certain number
+of uses. One possible application for this module might be to time out session
+variables in mod_perl programs.
 
 When tying, you can specify named arguments in the form of a hash. The
 following named parameters are supported:
@@ -149,12 +157,13 @@ following named parameters are supported:
 
 Use C<EXPIRES> to specify an interval or absolute time after which the
 value will be reset. (Technically, the value will still be there, but the
-module's FETCH sub will return the value as dictated by the expiry policy.)
+module's FETCH sub will return the value as dictated by the expiration
+policy.)
 
-Values for the C<EXPIRES> field are modelled after Netscape's cookie
-expiration times. Except, of course, that negative values don't really make
-sense in a universe with linear, one-way time. The following forms are all
-valid for the C<EXPIRES> field:
+Values for the C<EXPIRES> field are modeled after Netscape's cookie expiration
+times. Except, of course, that negative values don't really make sense in a
+universe with linear, one-way time. The following forms are all valid for the
+C<EXPIRES> field:
 
     +30s                    30 seconds from now
     +10m                    ten minutes from now
@@ -177,7 +186,7 @@ Alternatively or in addition to C<EXPIRES>, you can also specify a maximum
 number of times the variable may be read from before it expires. If both
 C<EXPIRES> and C<NUM_USES> are set, the variable will expire when either
 condition becomes true. If C<NUM_USES> isn't set or set to a negative
-value, it won't influence the expiry process.
+value, it won't influence the expiration process.
 
 Assigning a value to the variable causes C<NUM_USES> to be reset to the
 original value.
@@ -200,42 +209,39 @@ variable to a different value, for example.
 
 =back
 
-=head1 TAGS
+=head1 INSTALLATION
 
-If you talk about this module in blogs, on del.icio.us or anywhere else,
-please use the C<tiescalartimeout> tag.
+See perlmodinstall for information and options on installing Perl modules.
 
 =head1 BUGS AND LIMITATIONS
 
 No bugs have been reported.
 
-Please report any bugs or feature requests to
-C<bug-tie-scalar-timeout@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
-=head1 INSTALLATION
-
-See perlmodinstall for information and options on installing Perl modules.
+Please report any bugs or feature requests through the web interface at
+L<http://rt.cpan.org/Public/Dist/Display.html?Name=Tie-Scalar-Timeout>.
 
 =head1 AVAILABILITY
 
 The latest version of this module is available from the Comprehensive Perl
-Archive Network (CPAN). Visit <http://www.perl.com/CPAN/> to find a CPAN
-site near you. Or see <http://www.perl.com/CPAN/authors/id/M/MA/MARCEL/>.
+Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
+site near you, or see
+L<http://search.cpan.org/dist/Tie-Scalar-Timeout/>.
+
+The development version lives at
+L<http://github.com/hanekomu/Tie-Scalar-Timeout/>.
+Instead of sending patches, please fork this project using the standard git
+and github infrastructure.
 
 =head1 AUTHOR
 
-Marcel GrE<uuml>nauer, C<< <marcel@cpan.org> >>
-
-The code is almost completely lifted from L<Plagger>, so really Tatsuhiko
-Miyagawa C<< <miyagawa@bulknews.net> >> deserves all the credit.
+  Marcel Gruenauer <marcel@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2000-2007 by Marcel GrE<uuml>nauer
+This software is copyright (c) 2003 by Marcel Gruenauer.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
