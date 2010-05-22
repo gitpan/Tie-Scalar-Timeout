@@ -3,7 +3,9 @@ use strict;
 use warnings;
 
 package Tie::Scalar::Timeout;
-our $VERSION = '1.100880';
+BEGIN {
+  $Tie::Scalar::Timeout::VERSION = '2.101420';
+}
 # ABSTRACT: Scalar variables that time out
 use parent 'Tie::Scalar';
 use Time::Local;
@@ -120,7 +122,7 @@ Tie::Scalar::Timeout - Scalar variables that time out
 
 =head1 VERSION
 
-version 1.100880
+version 2.101420
 
 =head1 SYNOPSIS
 

@@ -2,7 +2,7 @@ NAME
     Tie::Scalar::Timeout - Scalar variables that time out
 
 VERSION
-    version 1.100880
+    version 2.101420
 
 SYNOPSIS
         use Tie::Scalar::Timeout;

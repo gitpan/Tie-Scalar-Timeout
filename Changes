@@ -1,5 +1,8 @@
 Revision history for Perl extension Tie-Scalar-Timeout
 
+2.101420  2010-05-22 13:23:19 Europe/Vienna
+    - set major version to 2 to preserve CPAN continuity
+
 1.100880  2010-03-29 23:17:24 Europe/Vienna
     - converted the distribution to Dist::Zilla-style
 
